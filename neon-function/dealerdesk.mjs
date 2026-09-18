@@ -43,7 +43,7 @@ async function readBody(request) {
   return text ? JSON.parse(text) : {};
 }
 
-export default {
+const dealerDeskFunction = {
   async fetch(request) {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
@@ -93,3 +93,5 @@ export default {
     }
   }
 };
+
+export default dealerDeskFunction;
