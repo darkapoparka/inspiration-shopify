@@ -2,13 +2,16 @@ import { createDemoState, type DemoState } from "@/lib/demo-data";
 
 const DEFAULT_DATA_API_URL =
   "https://ep-weathered-term-b1tp8vey.apirest.c-5.eu-central-1.aws.neon.tech/dealerdesk/rest/v1";
+const DEFAULT_DATA_API_TOKEN =
+  "eyJhbGciOiJSUzI1NiIsImtpZCI6ImRlYWxlcmRlc2stZGVtby0yMDI2IiwidHlwIjoiSldUIn0.eyJpc3MiOiJkZWFsZXJkZXNrLWNybS1kZW1vIiwic3ViIjoicHVibGljLWRlbW8iLCJhdWQiOiJkZWFsZXJkZXNrLWNybS1kZW1vIiwicm9sZSI6ImRlYWxlcmRlc2tfYW5vbiIsImlhdCI6MTc4OTc3MzczOCwibmJmIjoxNzg5NzczNjc4LCJleHAiOjIxMDUxMzM3Mzh9.FmyMmbRA6MoL2VSCItdJHKCPaNVCWNbhbnB1IJgwKzAszXY0U9yyy4617tON6kcf8xwhsqJECEY-cPMj8ZkAN5ZHrbzq-99z04ki7hHHebZIsDIVzwEawZ31jH56kpgy5nWr-B0xB2-Jb9ZUE_YhrvihIvMYSlPAcbcMQGWPctl9O0JT5Z-Q-qxw1g-dBG2E8iD5yspNl_6ETxPU5Qyew0GguCn9qmP8DrrniNZdbe999Dl1lsfeMwjsgmxUs77Vj8kF-2mLH7B1ynrDheYElAdUCb3vUnj4kXviBlMRAHi9CxEXyYA3-3gbcSLGLkjvdzKjN8nCPRsuk9XZChXIrw";
 const DATA_API_URL = (process.env.NEXT_PUBLIC_NEON_DATA_API_URL ?? DEFAULT_DATA_API_URL).replace(/\/$/, "");
+const DATA_API_TOKEN = process.env.NEXT_PUBLIC_NEON_DATA_API_TOKEN ?? DEFAULT_DATA_API_TOKEN;
 const SESSION_KEY = "dealerdesk-cloud-session-v1";
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 type WorkspaceRow = { state: DemoState };
 
-export const isDataApiConfigured = () => Boolean(DATA_API_URL);
+export const isDataApiConfigured = () => Boolean(DATA_API_URL && DATA_API_TOKEN);
 
 function getSessionId() {
   const existing = window.localStorage.getItem(SESSION_KEY) ?? "";
@@ -20,6 +23,7 @@ function getSessionId() {
 
 function requestHeaders(sessionId: string, prefer?: string) {
   const headers: Record<string, string> = {
+    authorization: `Bearer ${DATA_API_TOKEN}`,
     "content-type": "application/json",
     "x-demo-session": sessionId
   };
