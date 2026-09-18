@@ -1,12 +1,13 @@
 {
   "keys": [
     {
-      "kty": "RSA",
+      "kty": "EC",
       "use": "sig",
-      "alg": "RS256",
-      "kid": "dealerdesk-demo-2026",
-      "n": "q9daMeuLimWH0Sk0fm1q6ooe5L8z2Y9gGhkNzznAnIvQdCLj0_30dkjEQASzu5TWZFllR9boS3vzQMCMV26il81zs2VgBX1pP_J-VrcdwL-KwI6KWpWUjyKyviXGF1LlG9g0v6sMBUDratn1HXmJAaSH3ScjAoo23TKcWpPpEhFVThhyhcc4SiYzFqzH9-9bI9bZ77ArNWXLPfdPaKPPHb4SBTRiknZTnHgdRLcMQAO7ycNoZRRwF6weCaBFPzyCV5ScfjAjyksNAeSzL9O8_3xPh51PGHZzZlbBBNtMYEjWr3rzSc3MOgCcckZfsf25ucqZgdTef0W2NImO9Q",
-      "e": "AQAB"
+      "alg": "ES256",
+      "kid": "dealerdesk-demo-es256-2026",
+      "crv": "P-256",
+      "x": "iKpRURvFx4HEhFqZvYz-PFrCCA4xAuSRbojPYC5qXDY",
+      "y": "v5GfrIGpd1y0iTGImnbRpPb5AC_eZpvpyWRrn4YznxM"
     }
   ]
 }
