@@ -36,8 +36,10 @@ jobs:
           rm -rf app/api
           NEXT_STATIC_EXPORT=1 npm run build
 
-      - name: Configure GitHub Pages
+      - name: Enable and configure GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
