@@ -33,13 +33,14 @@ jobs:
           mkdir -p neon-function/dist
           npx esbuild neon-function/dealerdesk.mjs \
             --bundle \
+            --minify \
             --platform=node \
             --target=node24 \
             --format=esm \
             --banner:js="import{createRequire as ___cr}from'module';import{fileURLToPath as ___f}from'url';import{dirname as ___d}from'path';const require=___cr(import.meta.url);const __filename=___f(import.meta.url);const __dirname=___d(__filename);" \
             --outfile=neon-function/dist/index.mjs
           cd neon-function/dist
-          zip -j ../function.zip index.mjs
+          zip -9 -j ../function.zip index.mjs
 
       - name: Upload function bundle
         uses: actions/upload-artifact@v4
