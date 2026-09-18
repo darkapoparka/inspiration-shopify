@@ -1,0 +1,50 @@
+name: Bundle DealerDesk Neon Function
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "neon-function/**"
+      - ".github/workflows/neon-function.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install function bundler and runtime dependencies
+        run: npm install --no-save --no-audit --no-fund esbuild pg @neon/functions
+
+      - name: Bundle Neon Function
+        shell: bash
+        run: |
+          mkdir -p neon-function/dist
+          npx esbuild neon-function/dealerdesk.mjs \
+            --bundle \
+            --platform=node \
+            --target=node24 \
+            --format=esm \
+            --banner:js="import{createRequire as ___cr}from'module';import{fileURLToPath as ___f}from'url';import{dirname as ___d}from'path';const require=___cr(import.meta.url);const __filename=___f(import.meta.url);const __dirname=___d(__filename);" \
+            --outfile=neon-function/dist/index.mjs
+          cd neon-function/dist
+          zip -j ../function.zip index.mjs
+
+      - name: Upload function bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: dealerdesk-neon-function
+          path: neon-function/function.zip
+          if-no-files-found: error
+          retention-days: 7
