@@ -1,12 +1,19 @@
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 
 const endpoint =
   process.env.NEON_DATA_API_URL ??
   "https://ep-weathered-term-b1tp8vey.apirest.c-5.eu-central-1.aws.neon.tech/dealerdesk/rest/v1";
+const source = readFileSync(new URL("../lib/data-api.ts", import.meta.url), "utf8");
+const sourceToken = source.match(/const DEFAULT_DATA_API_TOKEN\s*=\s*\n?\s*"([^"]+)"/)?.[1];
+const token = process.env.NEON_DATA_API_TOKEN ?? sourceToken;
+if (!token) throw new Error("Neon Data API demo token is not configured.");
+
 const sessionId = randomUUID();
 const otherSessionId = randomUUID();
 const tableUrl = `${endpoint.replace(/\/$/, "")}/dealer_demo_workspaces`;
 const headers = {
+  authorization: `Bearer ${token}`,
   "content-type": "application/json",
   "x-demo-session": sessionId
 };
@@ -67,6 +74,7 @@ if (afterUpdate?.[0]?.state?.settings?.name !== "DealerDesk API updated") {
 const isolatedRead = await expectOk(
   await fetch(`${tableUrl}?id=eq.${sessionId}&select=id`, {
     headers: {
+      authorization: `Bearer ${token}`,
       "content-type": "application/json",
       "x-demo-session": otherSessionId
     }
