@@ -15,6 +15,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const COOKIE_NAME = "dealerdesk_demo_session";
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const isDemoState = (value: unknown): value is DemoState => {
   if (!value || typeof value !== "object") return false;
@@ -30,7 +31,8 @@ const isDemoState = (value: unknown): value is DemoState => {
 const sessionFromRequest = (request: Request) => {
   const cookie = request.headers.get("cookie") ?? "";
   const match = cookie.match(new RegExp(`(?:^|; )${COOKIE_NAME}=([^;]+)`));
-  return match?.[1] ?? randomUUID();
+  const candidate = match?.[1] ? decodeURIComponent(match[1]) : "";
+  return UUID_PATTERN.test(candidate) ? candidate : randomUUID();
 };
 
 const withSessionCookie = (response: NextResponse, sessionId: string) => {
