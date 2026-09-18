@@ -16,20 +16,24 @@ jobs:
     timeout-minutes: 20
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Check Vercel credentials
-        id: credentials
+      - name: Check deployment credentials
         shell: bash
         run: |
-          if [ -n "$VERCEL_TOKEN" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-          else
+          missing=0
+          if [ -z "$VERCEL_TOKEN" ]; then
             echo "::error::Add a VERCEL_TOKEN repository secret before running this workflow."
-            exit 1
+            missing=1
           fi
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Add the Neon DATABASE_URL as a repository secret before running this workflow."
+            missing=1
+          fi
+          exit "$missing"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -38,6 +42,14 @@ jobs:
 
       - name: Link or create Vercel project
         run: npx --yes vercel@latest link --yes --project dealerdesk-crm --scope tyj5 --token "$VERCEL_TOKEN"
+
+      - name: Configure Neon database
+        shell: bash
+        run: |
+          npx --yes vercel@latest env rm DATABASE_URL production --yes --scope tyj5 --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
+          printf '%s' "$DATABASE_URL" | npx --yes vercel@latest env add DATABASE_URL production --sensitive --scope tyj5 --token "$VERCEL_TOKEN"
+          npx --yes vercel@latest env rm DATABASE_URL preview --yes --scope tyj5 --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
+          printf '%s' "$DATABASE_URL" | npx --yes vercel@latest env add DATABASE_URL preview --sensitive --scope tyj5 --token "$VERCEL_TOKEN"
 
       - name: Deploy production
         id: deploy
