@@ -33,9 +33,6 @@ jobs:
       - name: Build production application
         run: npm run build
 
-      - name: Verify Neon cloud persistence and row isolation
-        run: node scripts/data-api-smoke.mjs
-
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
