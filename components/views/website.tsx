@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 
 import { useDemo } from "@/components/demo-context";
 import { Icon } from "@/components/icon";
@@ -74,7 +74,7 @@ export function WebsiteView() {
             <div className="device-switch"><button className={device === "desktop" ? "active" : ""} type="button" onClick={() => setDevice("desktop")}><Icon name="monitor" width={16} height={16} /></button><button className={device === "mobile" ? "active" : ""} type="button" onClick={() => setDevice("mobile")}><Icon name="phone" width={16} height={16} /></button></div>
           </div>
           <div className={`site-preview-frame ${device}`}>
-            <div className="mock-site" style={{ "--mock-accent": state.settings.accent } as React.CSSProperties}>
+            <div className="mock-site" style={{ "--mock-accent": state.settings.accent } as CSSProperties}>
               <header className="mock-site-header"><span className="mock-logo"><Icon name="car" width={18} height={18} />DEALERDESK</span><nav><span>Vehicles</span><span>Sell your car</span><span>Finance</span><span>About</span></nav><button>Contact us</button></header>
               <section className="mock-hero"><div><span>PREMIUM VEHICLES, PERSONALLY SELECTED</span><h2>Find a car you will love to drive.</h2><p>Explore inspected vehicles with transparent history and personal support from enquiry to handover.</p><button>Browse vehicles <Icon name="chevronRight" width={13} height={13} /></button></div><div className="mock-hero-car"><Icon name="car" width={108} height={108} /></div></section>
               <section className="mock-stock"><div className="mock-section-title"><div><span>AVAILABLE NOW</span><h3>Featured vehicles</h3></div><button>View all</button></div><div className="mock-vehicle-grid">{featured.map((vehicle) => <article key={vehicle.id}><div><Icon name="car" width={48} height={48} /></div><span>{vehicle.year}</span><h4>{vehicle.make} {vehicle.model}</h4><p>{vehicle.variant}</p><strong>{formatMoney(vehicle.price)}</strong></article>)}</div></section>
