@@ -12,7 +12,7 @@ import { LeadsView } from "@/components/views/leads";
 import { OverviewView } from "@/components/views/overview";
 import { SettingsView } from "@/components/views/settings";
 import { WebsiteView } from "@/components/views/website";
-import type { Lead, Vehicle, VehicleStatus } from "@/lib/demo-data";
+import type { Lead, VehicleStatus } from "@/lib/demo-data";
 
 type View = "overview" | "inventory" | "leads" | "calendar" | "analytics" | "website" | "settings";
 
