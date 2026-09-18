@@ -183,7 +183,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           label: "New lead added",
           detail: lead.name,
           at: "Just now",
-          tone: "green"
+          tone: "green" as const
         },
         ...current.activity
       ].slice(0, 8)
