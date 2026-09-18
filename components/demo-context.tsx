@@ -14,6 +14,12 @@ import {
 } from "react";
 
 import {
+  isDataApiConfigured,
+  loadDataApiWorkspace,
+  resetDataApiWorkspace,
+  saveDataApiWorkspace
+} from "@/lib/data-api";
+import {
   createDemoState,
   leadStages,
   type Appointment,
@@ -24,7 +30,7 @@ import {
   type Vehicle
 } from "@/lib/demo-data";
 
-type BackendMode = "loading" | "browser" | "neon";
+type BackendMode = "loading" | "browser" | "neon" | "data-api";
 
 type DemoContextValue = {
   state: DemoState;
@@ -48,6 +54,16 @@ type DemoContextValue = {
 const DemoContext = createContext<DemoContextValue | null>(null);
 const STORAGE_KEY = "dealerdesk-demo-state-v1";
 
+function loadBrowserState(fallback = createDemoState()) {
+  const local = window.localStorage.getItem(STORAGE_KEY);
+  if (!local) return fallback;
+  try {
+    return JSON.parse(local) as DemoState;
+  } catch {
+    return fallback;
+  }
+}
+
 export function DemoProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<DemoState>(() => createDemoState());
   const [backendMode, setBackendMode] = useState<BackendMode>("loading");
@@ -58,36 +74,29 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     const hydrate = async () => {
+      if (isDataApiConfigured()) {
+        try {
+          const cloudState = await loadDataApiWorkspace();
+          if (!active) return;
+          setState(cloudState);
+          setBackendMode("data-api");
+          hydrated.current = true;
+          return;
+        } catch (error) {
+          console.warn("Cloud demo persistence is unavailable; using browser storage.", error);
+        }
+      }
+
       try {
         const response = await fetch("/api/demo", { cache: "no-store" });
         if (!response.ok) throw new Error("Unable to load demo workspace");
         const payload = (await response.json()) as { mode: "browser" | "neon"; state: DemoState };
         if (!active) return;
-
-        if (payload.mode === "browser") {
-          const local = window.localStorage.getItem(STORAGE_KEY);
-          if (local) {
-            try {
-              setState(JSON.parse(local) as DemoState);
-            } catch {
-              setState(payload.state);
-            }
-          } else {
-            setState(payload.state);
-          }
-        } else {
-          setState(payload.state);
-        }
+        setState(payload.mode === "browser" ? loadBrowserState(payload.state) : payload.state);
         setBackendMode(payload.mode);
       } catch {
-        const local = window.localStorage.getItem(STORAGE_KEY);
-        if (local) {
-          try {
-            setState(JSON.parse(local) as DemoState);
-          } catch {
-            setState(createDemoState());
-          }
-        }
+        if (!active) return;
+        setState(loadBrowserState());
         setBackendMode("browser");
       } finally {
         hydrated.current = true;
@@ -105,7 +114,9 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     setSaving(true);
     const timer = window.setTimeout(async () => {
       try {
-        if (backendMode === "neon") {
+        if (backendMode === "data-api") {
+          await saveDataApiWorkspace(state);
+        } else if (backendMode === "neon") {
           const response = await fetch("/api/demo", {
             method: "POST",
             headers: { "content-type": "application/json" },
@@ -116,6 +127,11 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         }
         setLastSaved(new Intl.DateTimeFormat("en", { hour: "2-digit", minute: "2-digit" }).format(new Date()));
+      } catch (error) {
+        console.warn("Cloud save failed; this session will continue in browser storage.", error);
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        setBackendMode("browser");
+        setLastSaved("in this browser");
       } finally {
         setSaving(false);
       }
@@ -127,7 +143,9 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const resetDemo = useCallback(async () => {
     setSaving(true);
     try {
-      if (backendMode === "neon") {
+      if (backendMode === "data-api") {
+        setState(await resetDataApiWorkspace());
+      } else if (backendMode === "neon") {
         const response = await fetch("/api/demo", {
           method: "POST",
           headers: { "content-type": "application/json" },
